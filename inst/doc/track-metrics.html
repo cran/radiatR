@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Quantifying path shape</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Quantifying path shape</h1>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(radiatR)</span></code></pre></div>
+<div id="overview" class="section level2">
+<h2>Overview</h2>
+<p>Alongside the circular <em>heading</em> statistics (see
+<code>vignette(&quot;circular-statistics&quot;)</code>), radiatR provides
+<strong>spatial</strong> metrics that describe the geometry of each
+trajectory: how far it travelled, how straight it was, and how tortuous.
+These are per-track scalars, returned as tidy data frames keyed by the
+trajectory id, computed on the recorded <code>x</code>/<code>y</code>
+coordinates.</p>
+<p>There are two complementary notions of tortuosity:</p>
+<ul>
+<li><strong>Displacement-based</strong> —
+<code>straightness_index()</code> / <code>tortuosity_ratio()</code> —
+compare the net start-to-end displacement with the total distance
+walked. They are simple and scale-invariant, but rely on net
+displacement, which is unreliable for convoluted or random-search paths
+that end up near where they started.</li>
+<li><strong>Turning-based</strong> — <code>sinuosity()</code> (Benhamou
+2004) — is built from the turning angles and step lengths, so it stays
+meaningful when net displacement is small.</li>
+</ul>
+<p>The per-observation <strong>kinematics</strong> (instantaneous speed,
+velocity, turning rate, <code>plot_profile()</code>) live in the main
+workflow article — see the kinematics section of <a href="https://johnkirwan.github.io/radiatR/articles/radiatR.html">Get
+started</a>.</p>
+<p>We use the bundled millipede dataset throughout.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">data</span>(cpunctatus)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>cpunctatus</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co">#&gt; Tracks: 235 trajectories, 44331 observations</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&gt; Columns: id=&#39;trial_id&#39;, time=&#39;frame&#39;, angle=&#39;rel_theta&#39; (radians), x=&#39;trans_x&#39;, y=&#39;trans_y&#39;, rel_x=&#39;rel_x&#39;, rel_y=&#39;rel_y&#39;</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt; Transform steps: unit_circle_mapping </span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt; # A tibble: 6 × 18</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt;   trial_id frame     x     y trans_x  trans_y trans_rho abs_theta rel_theta</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;    &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&gt; 1 10_1_1       1  456.  372. 0.00511  0         0.00511     0         6.21 </span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co">#&gt; 2 10_1_1       2  458.  370. 0.0128   0.00770   0.0149      0.541     0.464</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co">#&gt; 3 10_1_1       3  456.  370. 0.00511  0.00770   0.00924     0.985     0.908</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="co">#&gt; 4 10_1_1       4  454.  370. 0        0.00770   0.00770     1.57      1.49 </span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co">#&gt; 5 10_1_1       5  456.  377. 0.00511 -0.0153    0.0162      5.03      4.96 </span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co">#&gt; 6 10_1_1       6  459.  382. 0.0154  -0.0307    0.0343      5.18      5.10 </span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co">#&gt; # ℹ 9 more variables: rel_x &lt;dbl&gt;, rel_y &lt;dbl&gt;, video &lt;chr&gt;, order &lt;chr&gt;,</span></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="co">#&gt; #   vid_ord &lt;chr&gt;, radius &lt;dbl&gt;, arc &lt;ord&gt;, type &lt;chr&gt;, individual &lt;chr&gt;</span></span></code></pre></div>
+</div>
+<div id="path-length" class="section level2">
+<h2>Path length</h2>
+<p><code>track_length()</code> is the total distance walked along each
+trajectory. With the default unit-circle coordinates it is in
+unit-circle radii; attach a calibration with
+<code>set_distance_scale()</code> (or <code>calibrate_distance()</code>)
+and it is reported in physical units.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">track_length</span>(cpunctatus))                         <span class="co"># unit-circle radii</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co">#&gt;         trial_id    length</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co">#&gt; 10_1_1    10_1_1 1.3645581</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt; 10_10_1  10_10_1 8.7387738</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; 10_11_1  10_11_1 1.2783589</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; 10_12_1  10_12_1 1.2376997</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt; 10_13_1  10_13_1 1.5926105</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt; 10_14_1  10_14_1 0.9365288</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">track_length</span>(<span class="fu">set_distance_scale</span>(cpunctatus, <span class="dv">50</span>, <span class="at">unit =</span> <span class="st">&quot;mm&quot;</span>)))   <span class="co"># mm</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt;         trial_id    length</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt; 10_1_1    10_1_1  68.22790</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt; 10_10_1  10_10_1 436.93869</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#&gt; 10_11_1  10_11_1  63.91794</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt; 10_12_1  10_12_1  61.88499</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt; 10_13_1  10_13_1  79.63053</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt; 10_14_1  10_14_1  46.82644</span></span></code></pre></div>
+<p>The single-path helpers <code>path_*</code> operate on plain
+<code>x</code>/<code>y</code> vectors if you want a metric for one
+trajectory outside a <code>Tracks</code>.</p>
+</div>
+<div id="restricting-to-within-the-circumference" class="section level2">
+<h2>Restricting to within the circumference</h2>
+<p>Tracks can wander past the circumference (<code>rho &gt; 1</code>) –
+the animal reaching the edge, or an occasional tracking outlier.
+<code>restrict_to_circumference()</code> returns a <code>Tracks</code>
+with that out-of-circumference data removed, so the metrics see only the
+within-circle path. <code>mode = &quot;truncate&quot;</code> (the default) keeps
+each track up to its first excursion beyond the circumference;
+<code>mode = &quot;drop&quot;</code> removes individual out-of-circumference
+points.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>within <span class="ot">&lt;-</span> <span class="fu">restrict_to_circumference</span>(cpunctatus, <span class="at">mode =</span> <span class="st">&quot;truncate&quot;</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="co">#&gt; restrict_to_circumference(truncate): removed 489 of 44331 rows.</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">track_length</span>(within))</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#&gt;         trial_id    length</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt; 10_1_1    10_1_1 1.3645581</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt; 10_10_1  10_10_1 8.7387738</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; 10_11_1  10_11_1 1.2628195</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; 10_12_1  10_12_1 1.1615569</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; 10_13_1  10_13_1 1.5757405</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; 10_14_1  10_14_1 0.9365288</span></span></code></pre></div>
+<p>This is the data counterpart to the plot-only
+<code>radiate(clip_tracks = TRUE)</code>.</p>
+</div>
+<div id="straightness-and-tortuosity" class="section level2">
+<h2>Straightness and tortuosity</h2>
+<p>The straightness index is net displacement / total length, in
+<code>[0, 1]</code> (1 = perfectly straight). The tortuosity ratio is
+its reciprocal, in <code>[1, Inf)</code>.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>si <span class="ot">&lt;-</span> <span class="fu">straightness_index</span>(cpunctatus)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>tr <span class="ot">&lt;-</span> <span class="fu">tortuosity_ratio</span>(cpunctatus)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="fu">head</span>(si)</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co">#&gt;         trial_id straightness</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">#&gt; 10_1_1    10_1_1   0.71927750</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co">#&gt; 10_10_1  10_10_1   0.09897137</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt; 10_11_1  10_11_1   0.79943750</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt; 10_12_1  10_12_1   0.82488090</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co">#&gt; 10_13_1  10_13_1   0.63885806</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt; 10_14_1  10_14_1   0.93581201</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co"># single-path versions on bare coordinates</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="fu">path_straightness</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>), <span class="at">y =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>))      <span class="co"># straight -&gt; 1</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="fu">path_tortuosity</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>), <span class="at">y =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>))        <span class="co"># L-shaped  -&gt; sqrt(2)</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co">#&gt; [1] 1.414214</span></span></code></pre></div>
+</div>
+<div id="sinuosity" class="section level2">
+<h2>Sinuosity</h2>
+<p><code>sinuosity()</code> implements the Benhamou (2004) index
+<code>S = 2 / sqrt(p (1 + c) / (1 - c) + b^2)</code> (<code>p</code>
+mean step length, <code>c</code> mean cosine of turning angles,
+<code>b</code> the CV of step length). A straight path gives
+<code>0</code>; more winding paths give larger values. Unlike the
+straightness index it is <strong>not</strong> scale-invariant — it has
+units of <code>1 / sqrt(length)</code>, so for the most reliable
+comparison across trajectories the path should be sampled at a common
+step length.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>sn <span class="ot">&lt;-</span> <span class="fu">sinuosity</span>(cpunctatus)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="fu">head</span>(sn)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co">#&gt;         trial_id sinuosity</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co">#&gt; 10_1_1    10_1_1  3.995306</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt; 10_10_1  10_10_1  2.329886</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt; 10_11_1  10_11_1  3.771568</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt; 10_12_1  10_12_1  3.248539</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt; 10_13_1  10_13_1  3.249218</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co">#&gt; 10_14_1  10_14_1  1.687342</span></span></code></pre></div>
+<p>The three tortuosity measures can be read side by side. Here we join
+them per track and average within each stimulus condition
+(<code>arc</code> = target half-width in degrees, <code>0</code> =
+featureless control):</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>metrics <span class="ot">&lt;-</span> <span class="fu">Reduce</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  <span class="cf">function</span>(a, b) <span class="fu">merge</span>(a, b, <span class="at">by =</span> <span class="st">&quot;trial_id&quot;</span>),</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  <span class="fu">list</span>(<span class="fu">straightness_index</span>(cpunctatus), <span class="fu">tortuosity_ratio</span>(cpunctatus),</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>       <span class="fu">sinuosity</span>(cpunctatus))</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>)</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>arc <span class="ot">&lt;-</span> <span class="fu">unique</span>(<span class="fu">as.data.frame</span>(cpunctatus)[, <span class="fu">c</span>(<span class="st">&quot;trial_id&quot;</span>, <span class="st">&quot;arc&quot;</span>)])</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>metrics <span class="ot">&lt;-</span> <span class="fu">merge</span>(metrics, arc, <span class="at">by =</span> <span class="st">&quot;trial_id&quot;</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="fu">aggregate</span>(<span class="fu">cbind</span>(straightness, tortuosity, sinuosity) <span class="sc">~</span> arc,</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>          <span class="at">data =</span> metrics, <span class="at">FUN =</span> <span class="cf">function</span>(v) <span class="fu">round</span>(<span class="fu">mean</span>(v, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="dv">2</span>))</span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co">#&gt;   arc straightness tortuosity sinuosity</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt; 1   0         0.68       2.66      2.35</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co">#&gt; 2   5         0.52       2.51      2.16</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co">#&gt; 3  10         0.57       3.36      2.46</span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="co">#&gt; 4  15         0.59       2.02      1.74</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="co">#&gt; 5  20         0.65       1.64      1.66</span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="co">#&gt; 6  30         0.72       1.67      2.13</span></span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="co">#&gt; 7  40         0.75       1.39      1.95</span></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="co">#&gt; 8  50         0.68       1.64      2.02</span></span></code></pre></div>
+</div>
+<div id="goal-directed-paths-and-zone-occupancy" class="section level2">
+<h2>Goal-directed paths and zone occupancy</h2>
+<p>A second family of spatial metrics summarises <em>where</em> a track
+went relative to a <strong>target direction</strong> — the water-maze
+idiom (probe-trial quadrant dwell, and crossings of a goal zone). On
+<code>cpunctatus</code> the natural target is the stimulus; in the
+landmark-<strong>relative</strong> frame the stimulus sits at angle
+<code>0</code>, so we pass <code>coords = &quot;relative&quot;</code> and
+<code>target_angle = 0</code>.</p>
+<p><code>count_goal_entries()</code> counts how many times each track
+enters a small goal zone at the target (a <code>FALSE -&gt; TRUE</code>
+crossing of <code>distance &lt; crossing_radius</code>):</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">count_goal_entries</span>(cpunctatus, <span class="at">target_angle =</span> <span class="dv">0</span>, <span class="at">coords =</span> <span class="st">&quot;relative&quot;</span>))</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="co">#&gt;              id n_entries</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co">#&gt; 10_1_1   10_1_1         0</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co">#&gt; 10_10_1 10_10_1         0</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt; 10_11_1 10_11_1         1</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co">#&gt; 10_12_1 10_12_1         0</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co">#&gt; 10_13_1 10_13_1         1</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt; 10_14_1 10_14_1         0</span></span></code></pre></div>
+<p><code>zone_dwell()</code> gives the proportion of frames each track
+spends in every quadrant–ring zone (<code>Q1</code> is the target
+quadrant, the outer ring is the rim):</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>dwell <span class="ot">&lt;-</span> <span class="fu">zone_dwell</span>(cpunctatus, <span class="at">target_angle =</span> <span class="dv">0</span>, <span class="at">coords =</span> <span class="st">&quot;relative&quot;</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="fu">head</span>(dwell)</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="co">#&gt;                id quadrant ring  zone n_frames proportion</span></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co">#&gt; 10_1_1.1   10_1_1        1    1 Q1.R1       30 0.37037037</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co">#&gt; 10_1_1.2   10_1_1        2    1 Q2.R1        2 0.02469136</span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co">#&gt; 10_1_1.3   10_1_1        4    1 Q4.R1       11 0.13580247</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#&gt; 10_1_1.4   10_1_1        1    2 Q1.R2       26 0.32098765</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt; 10_1_1.5   10_1_1        1    3 Q1.R3       12 0.14814815</span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt; 10_10_1.1 10_10_1        1    1 Q1.R1       43 0.14381271</span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co"># mean occupancy of the target quadrant (Q1) across tracks</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="fu">mean</span>(<span class="fu">tapply</span>(dwell<span class="sc">$</span>proportion[dwell<span class="sc">$</span>quadrant <span class="sc">==</span> <span class="dv">1</span>],</span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>            dwell<span class="sc">$</span>id[dwell<span class="sc">$</span>quadrant <span class="sc">==</span> <span class="dv">1</span>], sum), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co">#&gt; [1] 0.5809896</span></span></code></pre></div>
+<p>Tune the goal zone with <code>target_radius</code> /
+<code>crossing_radius</code> and the annuli with
+<code>ring_breaks</code> — see <code>?count_goal_entries</code> and
+<code>?zone_dwell</code>.</p>
+</div>
+<div id="see-also" class="section level2">
+<h2>See also</h2>
+<p>The Shiny companion app surfaces these per-track metrics
+interactively (a caption of mean straightness / sinuosity and a
+downloadable metrics table) — launch it with <code>launch_app()</code>.
+The per-observation kinematics (<code>instantaneous_speed()</code>,
+<code>velocity_vector()</code>, <code>angular_velocity()</code>,
+<code>plot_profile()</code>) are covered in the <a href="https://johnkirwan.github.io/radiatR/articles/radiatR.html">Get
+started</a> article.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
